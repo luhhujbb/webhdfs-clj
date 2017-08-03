@@ -4,4 +4,5 @@
  :secure?  true
  :principal rdsr@DOMAIN.COM
  :password password
+ :user "hdfs"
  }

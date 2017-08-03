@@ -43,7 +43,7 @@
 
 (defn- optionally-add-user
   [query-opts]
-  (if (a/secure?) query-opts (assoc query-opts :user (u/cfg :user))))
+  (if (a/secure?) query-opts (assoc query-opts :user (u/cfg :user) "user.name" (u/cfg :user))))
 
 (defn- optionally-add-doas-user
   [query-opts]

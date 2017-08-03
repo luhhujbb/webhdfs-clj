@@ -6,7 +6,7 @@ A very light weight library without any Hadoop or Http client dependencies. Also
 ## Setup
 
 ### Configuration
-The library expects a configuration file with name `conf/config.clj`. The file contains a clojure map with all the needed properties. See [conf/example-config.clj](conf/example-config.clj).
+A sample of lib conf is available there [conf/example-config.clj](conf/example-config.clj).
 
 ### Talking to a non-secure cluster
 Remove the `:secure?` key from `config.clj` (or set it to `false`) and add the key `:user` . The value of the `:user` key is passed as the query parameter `user.name` to authenticate to a non-secure cluster.
@@ -33,6 +33,13 @@ lein repl
 ```clojure
 (use 'webhdfs-clj.core)
 (require '[clojure.java.io :as io])
+
+
+;;init webhdfs connexion settings/auth (from code)
+(init! {:host "your-namenode-host" :port 50070 :secure? false})
+
+;;init webhdfs connexion settings/auth (from config file)
+(init! (load-file "/path/to/your/congig/file.clj"))
 
 ;; Copy a file '/tmp/A' on to the cluster
 (create "/tmp/A" "/home/rratti/A")

@@ -10,9 +10,6 @@
            (java.net URI URL)
            (java.io IOException)))
 
-;; setup authentication
-(a/setup-auth!)
-
 (defn- resolve-class [class-name]
   (try
     (resolve (symbol class-name))
@@ -215,3 +212,8 @@
 (defn cancel-delegation-token [token]
   (http-put "/" {:op :canceldelegationtoken :token token})
   'ok)
+
+(defn init!
+  [config]
+  (u/reset-cfg! config)
+  (a/setup-auth!))

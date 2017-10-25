@@ -1,4 +1,4 @@
-(defproject webhdfs-clj "0.1.2"
+(defproject webhdfs-clj "0.1.3"
             :jvm-opts [;"-Dsun.security.krb5.debug=true"
                        "-Djava.security.auth.login.config=conf/headless.conf"]
             :resource-paths ["conf"]

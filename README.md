@@ -9,7 +9,8 @@ A very light weight library without any Hadoop or Http client dependencies. Also
 
 There are two config sample, one for ha cluster other for ha cluster
 A sample of this lib conf is available there [conf/example-config.clj](conf/example-config.clj). (non-ha)
-A sample of this lib conf is available there [conf/example-config.clj](conf/example-config-ha.clj). (ha)
+
+A sample of this lib conf is available there [conf/example-config-ha.clj](conf/example-config-ha.clj). (ha)
 
 ### Talking to a non-secure cluster
 Remove the `:secure?` key from config (or set it to `false`) and add the key `:user` . The value of the `:user` key is passed as the query parameter `user.name` to authenticate to a non-secure cluster.

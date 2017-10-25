@@ -17,12 +17,17 @@
       (log/warn "Could not resolve class" class-name ". Using IOException instead")
       IOException)))
 
-(defn- throw-exception [json-data]
-  (let [{:keys [javaClassName message]} (:RemoteException json-data)]
+(defn- throw-exception
+  [javaClassName message]
     (throw
       (Reflector/invokeConstructor
         (resolve-class javaClassName)
-        (to-array [message])))))
+        (to-array [message]))))
+
+(defn- handle-failure [json-data]
+  (let [{:keys [javaClassName message]} (:RemoteException json-data)]
+    (throw
+      (ex-info message {:class javaClassName}))))
 
 (defn- abs-url [uri]
   (let [uri (URI. uri)]
@@ -71,7 +76,7 @@
                           (try
                             (cond
                               (failure? status)
-                              (throw-exception (json->map body))
+                              (handle-failure (json->map body))
                               ;; Webhdfs REST API only returns TEMPORARY_REDIRECT in
                               ;; cases of PUT and APPEND. In these cases, we pass
                               ;; url back so that a separate request can we made
@@ -79,16 +84,15 @@
                               (= status 307) (headers "location")
                               (= (:as opts) :json) (json/read-str body :key-fn keyword)
                               :else body)
-                            (catch IOException e
+                            (catch clojure.lang.ExceptionInfo e
+                              (let [ex-class (:class (ex-data e))]
                               (if (and
-                                    (or
-                                      (= (.getMessage e) "Operation category WRITE is not supported in state standby")
-                                      (= (.getMessage e) "Operation category READ is not supported in state standby"))
+                                    (= ex-class "org.apache.hadoop.ipc.StandbyException")
                                     (not ret))
                                   (do
                                     (u/switch-nn)
                                     (request method uri opts true))
-                                  (throw e)))))]
+                                  (throw-exception ex-class (.getMessage e)))))))]
     (log/debug "Executing request, method:" method ", uri:" uri ", query:" query-opts)
     (let [{:keys [status body headers] :as resp}
           (http/request

@@ -57,16 +57,40 @@
        {:javaClassName "java.lang.IllegalStateException"
         :message (str "Could not parse content as json: Original content: " s)}})))
 
-(defn- request [method uri opts]
+
+
+(defn- request [method uri opts & [retry]]
   (let [url (abs-url uri)
         failure? (complement http/unexceptional-status?)
         query-opts (-> opts
                        :query-params
                        optionally-add-user
                        optionally-add-doas-user
-                       query-params-as-strings)]
+                       query-params-as-strings)
+        handle-response (fn [{:keys [status body headers] :as resp} ret]
+                          (try
+                            (cond
+                              (failure? status)
+                              (throw-exception (json->map body))
+                              ;; Webhdfs REST API only returns TEMPORARY_REDIRECT in
+                              ;; cases of PUT and APPEND. In these cases, we pass
+                              ;; url back so that a separate request can we made
+                              ;; to the right datanode (specified in the redirected url)
+                              (= status 307) (headers "location")
+                              (= (:as opts) :json) (json/read-str body :key-fn keyword)
+                              :else body)
+                            (catch IOException e
+                              (if (and
+                                    (or
+                                      (= (.getMessage e) "Operation category WRITE is not supported in state standby")
+                                      (= (.getMessage e) "Operation category READ is not supported in state standby"))
+                                    (not ret))
+                                  (do
+                                    (u/switch-nn)
+                                    (request method uri opts true))
+                                  (throw e)))))]
     (log/info "Executing request, method:" method ", uri:" uri ", query:" query-opts)
-    (let [{:keys [status body headers]}
+    (let [{:keys [status body headers] :as resp}
           (http/request
             (merge {:method           method
                     :follow-redirects false
@@ -74,17 +98,7 @@
                     :url              url}
                    (assoc opts :query-params query-opts)))]
       (log/info "Received status: " status)
-      (cond
-        (failure? status)
-
-        (throw-exception (json->map body))
-        ;; Webhdfs REST API only returns TEMPORARY_REDIRECT in
-        ;; cases of PUT and APPEND. In these cases, we pass
-        ;; url back so that a separate request can we made
-        ;; to the right datanode (specified in the redirected url)
-        (= status 307) (headers "location")
-        (= (:as opts) :json) (json/read-str body :key-fn keyword)
-        :else body))))
+      (handle-response resp retry))))
 
 (defn- http-get [uri query-opts & {:as opts}]
   (request :get uri (merge {:as :json} opts {:query-params query-opts})))
@@ -214,6 +228,15 @@
   'ok)
 
 (defn init!
-  [config]
-  (u/reset-cfg! config)
-  (a/setup-auth!))
+  [{:keys [host hosts] :as config}]
+  (if (or
+        (not (nil? host))
+        (and
+          (not (nil? hosts))
+          (= 2 (count hosts))))
+    (do
+      (if hosts
+        (u/reset-cfg! (assoc config :host (first hosts)))
+        (u/reset-cfg! config))
+      (a/setup-auth!))
+  (throw (ex-info "Bad config" {:causes "Bad namenode configuration"}))))

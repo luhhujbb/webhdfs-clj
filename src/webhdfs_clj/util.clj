@@ -14,11 +14,18 @@
 
 (defn base-url []
   (let [{:keys [host port]} (cfg)]
-    (str "http://" host ":" port "/webhdfs/v1")))
+      (str "http://" host ":" port "/webhdfs/v1")))
 
 ;;Config loader
 (def swap-cfg!
   (partial swap! cfg-state))
+
+(defn switch-nn []
+  []
+  (when-let [hosts (cfg :hosts)]
+    (if (= (cfg :host) (first hosts))
+      (swap-cfg! assoc :host (last hosts))
+      (swap-cfg! assoc :host (first hosts)))))
 
 (defn reset-cfg!
   [config]

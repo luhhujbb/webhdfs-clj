@@ -1,4 +1,4 @@
-(defproject luhhujbb/webhdfs-clj "0.1.4"
+(defproject luhhujbb/webhdfs-clj "0.1.5"
             :jvm-opts [;"-Dsun.security.krb5.debug=true"
                        "-Djava.security.auth.login.config=conf/headless.conf"]
             :resource-paths ["conf"]
@@ -9,4 +9,7 @@
             :dependencies [[clj-http-lite "0.3.0"]
                            [org.clojure/data.json "0.2.6"]
                            [org.clojure/tools.logging "0.4.0"]
-                           [org.clojure/clojure "1.8.0"]])
+                           [org.clojure/tools.cli "0.3.5"]
+                           [org.clojure/clojure "1.8.0"]]
+           :aot [webhdfs-clj.cli]
+           :main webhdfs-clj.cli)

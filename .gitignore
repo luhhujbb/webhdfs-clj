@@ -11,6 +11,8 @@
 /classes
 conf/user.conf
 conf/headless.conf
+conf/prod.clj
+conf/stage.clj
 conf/*.keytab
 conf/config.clj
 /target

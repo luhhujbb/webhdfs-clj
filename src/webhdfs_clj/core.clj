@@ -203,7 +203,10 @@
 
 (defn set-owner [uri & {:keys [owner group]}]
   ;; owner and group are optional in webhdfs rest-api spec
-  (http-put uri {:op :setowner :owner owner :group group}))
+  (try
+    (http-put uri {:op :setowner :owner owner :group group})
+    (catch java.io.EOFException e
+      nil)))
 
 (defn set-replication [uri & {:keys [replication]}]
   ;; replication is optional in webhdfs rest-api spec

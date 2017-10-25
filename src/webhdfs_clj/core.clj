@@ -89,7 +89,7 @@
                                     (u/switch-nn)
                                     (request method uri opts true))
                                   (throw e)))))]
-    (log/info "Executing request, method:" method ", uri:" uri ", query:" query-opts)
+    (log/debug "Executing request, method:" method ", uri:" uri ", query:" query-opts)
     (let [{:keys [status body headers] :as resp}
           (http/request
             (merge {:method           method
@@ -97,7 +97,7 @@
                     :throw-exceptions false
                     :url              url}
                    (assoc opts :query-params query-opts)))]
-      (log/info "Received status: " status)
+      (log/debug "Received status: " status)
       (handle-response resp retry))))
 
 (defn- http-get [uri query-opts & {:as opts}]

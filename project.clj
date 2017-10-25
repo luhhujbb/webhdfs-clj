@@ -7,6 +7,6 @@
             :license {:name "MIT License"
                       :url "https://opensource.org/licenses/mit-license.php"}
             :dependencies [[clj-http-lite "0.3.0"]
-                           [org.clojure/data.json "0.2.5"]
-                           [org.clojure/tools.logging "0.3.1"]
-                           [org.clojure/clojure "1.6.0"]])
+                           [org.clojure/data.json "0.2.6"]
+                           [org.clojure/tools.logging "0.4.0"]
+                           [org.clojure/clojure "1.8.0"]])

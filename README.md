@@ -1,5 +1,7 @@
 # `webhdfs-clj`
 
+[![Clojars Project](https://img.shields.io/clojars/v/luhhujbb/webhdfs-clj.svg)](https://clojars.org/luhhujbb/webhdfs-clj)
+
 A Clojure client library for Hadoop WebHDFS Rest API.
 A very light weight library without any Hadoop or Http client dependencies. Also works with a secure (kerborized) Hadoop cluster.
 
@@ -29,11 +31,21 @@ Set the key :secure? to `true` in the configuration
  * Kerberos can make use of AES-128 or 256 to encrypt it's keys. For Java, to support AES-256, an addition JCE policy file must be install. These files can be downloaded from http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html
  * Make sure you have the right `krb5.conf` at `/etc/krb5.conf` or you may set the jvm property `java.security.krb5.conf` to the location of your `krb5.conf` file.
 
-## Usage
+## From repl
+
 ```bash
 # start up lein from the root of the project
 lein repl
 ```
+
+## Import
+
+```clojure
+[luhhujbb/webhdfs-clj "0.1.3"]
+```
+
+## Usage
+
 ```clojure
 (use 'webhdfs-clj.core)
 (require '[clojure.java.io :as io])

@@ -4,6 +4,23 @@
 
 (def ^:private cfg-state (atom nil))
 
+(defn octal->human
+  [octal]
+    (let [read (if (#{"4" "5" "6" "7"} (str octal))
+                "r"
+                "-")
+          write (if (#{"2" "3" "6" "7"} (str octal))
+                    "w"
+                    "-")
+          execute (if (#{"1" "3" "5" "7"} (str octal))
+                    "x"
+                    "-")]
+    (str read write execute)))
+
+(defn octals->human
+  [octals]
+  (apply str (doall (map octal->human (str octals)))))
+
 (defn init?
   []
   (nil? @cfg-state))

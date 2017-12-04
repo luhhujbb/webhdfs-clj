@@ -1,12 +1,13 @@
 (ns webhdfs-clj.cli
   (:require [clojure.tools.cli :refer [parse-opts]]
             [webhdfs-clj.core :as wdfs]
+            [webhdfs-clj.util :refer [octals->human]]
             [clojure.tools.logging :as log]
             [clojure.java.io :as io])
   (:gen-class))
 
 (def actions
-  [:status :delete :copy-to-hdfs :copy-from-hdfs :mkdir :rmdir :append :chown])
+  [:status :delete :copy-to-hdfs :copy-from-hdfs :mkdir :rmdir :append :chown :ls])
 
 (def cli-options
   [["-c" "--config CONFIG" "Config File"
@@ -40,6 +41,8 @@
   [my-map]
   (mapcat identity (remove (comp nil? second) my-map)))
 
+
+
 (defn -main [& args]
   (let [opts (parse-opts args cli-options)
         options (:options opts)]
@@ -48,6 +51,23 @@
       (wdfs/init! (:config options))
       (condp = (:action options)
         :status (println (wdfs/get-file-status (:src options)))
+        :ls (let [res (wdfs/list-status (:src options))]
+                  (println (str "Found " (count res) " items"))
+                  (doseq [f res]
+                    (println
+                      (str (if (= (:type f) "DIRECTORY")
+                              "d"
+                              "-")
+                            (octals->human (:permission f))
+                            "  - "
+                            (:owner f) " "
+                            (:group f) "      "
+                            (:src options)
+                            (when-not (= "/" (.substring
+                                              (:src options)
+                                              ^Integer (int (- (.length (:src options)) 1))))
+                              "/")
+                            (:pathSuffix f)))))
         :copy-to-hdfs (apply
                         wdfs/create
                         (:dest options)
